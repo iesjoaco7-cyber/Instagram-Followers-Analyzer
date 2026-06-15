@@ -1,0 +1,62 @@
+## LINK DEL VIDEO: 
+https://www.tiktok.com/@etienterzzo/video/7579365375243029768?is_from_webapp=1&sender_device=pc&web_id=7447614466269464069
+
+## 📖 Cómo funciona
+
+Este proyecto identifica qué usuarios de Instagram no corresponden tu seguimiento,
+utilizando los datos oficiales que la plataforma permite exportar. A diferencia de
+las herramientas web de terceros, todo el análisis se realiza **localmente con
+Python**, de modo que tus datos personales nunca salen de tu entorno.
+
+### Paso a paso
+
+**1. Solicitud de descarga de datos**
+
+Accedé al Centro de cuentas de Instagram y solicitá la descarga de tu información
+personal. Seleccioná específicamente las listas de **seguidores** y **seguidos**,
+y elegí el formato **JSON** (no HTML).
+
+**2. Obtención de los archivos**
+
+Instagram te entrega un archivo comprimido (ZIP). Al descomprimirlo vas a encontrar,
+entre otros, los archivos que necesita el script:
+- `followers_1.json` — quiénes te siguen
+- `following.json` — a quiénes seguís
+- `pending_follow_requests.json` — solicitudes pendientes (perfiles privados)
+
+**3. Carga de los archivos en Python**
+
+En lugar de subir tus datos a un sitio externo, cargás los archivos JSON directamente
+en el entorno de Python (Google Colab o tu máquina local). El script los lee con la
+librería estándar `json`, sin necesidad de instalar nada.
+
+**4. Procesamiento automático**
+
+El código compara las listas y resuelve automáticamente las dificultades habituales
+de estos archivos:
+- Detecta si cada archivo es una lista directa o un diccionario con la lista anidada.
+- Corrige la codificación de los nombres (los emojis y acentos que Instagram exporta
+  con caracteres ilegibles).
+- Avisa con un mensaje claro si falta algún archivo, en lugar de cortarse con un error.
+
+**5. Resultados**
+
+El script imprime tres listados ordenados alfabéticamente, cada uno con el enlace
+directo al perfil:
+- **No te siguen de vuelta** — cuentas que seguís pero que no te siguen.
+- **No los seguís de vuelta** — cuentas que te siguen pero que vos no seguís.
+- **Solicitudes pendientes** — perfiles privados a los que enviaste solicitud y aún
+  no te aceptaron, con nombre de usuario y nombre real.
+
+Al final, muestra un resumen con los totales de cada categoría.
+
+### Ventajas frente a las herramientas web
+
+A diferencia de los sitios externos que requieren subir tu archivo y revisar los
+resultados manualmente por posibles errores de lectura, este script:
+- **Mantiene tus datos privados**: nunca abandonan tu computadora o tu sesión de Colab.
+- **Es transparente**: podés ver y modificar exactamente cómo se procesa la información.
+- **Ofrece más análisis**: no solo quién no te sigue, sino también a quién no seguís
+  y tus solicitudes pendientes.
+- **Maneja los errores de raíz**: la detección de estructura y la corrección de
+  encoding evitan los fallos de lectura que obligan a verificar a mano.
