@@ -1,0 +1,119 @@
+import json
+import os
+
+# ============================================================
+#  CONFIGURACIÓN: cambiá esta ruta para cada cuenta
+# ============================================================
+CARPETA = '/content'   # carpeta donde subiste los JSON de Instagram
+
+# ============================================================
+#  FUNCIONES AUXILIARES
+# ============================================================
+def cargar_json(nombre_archivo):
+    """Carga un JSON desde la carpeta configurada. Devuelve None si no existe."""
+    ruta = os.path.join(CARPETA, nombre_archivo)
+    if not os.path.exists(ruta):
+        print(f"⚠️  No se encontró: {nombre_archivo}")
+        return None
+    with open(ruta, 'r', encoding='utf-8') as f:
+        return json.load(f)
+
+def arreglar_texto(texto):
+    """Corrige el encoding doblemente codificado de Instagram (mojibake)."""
+    try:
+        return texto.encode('latin-1').decode('utf-8')
+    except (UnicodeEncodeError, UnicodeDecodeError):
+        return texto
+
+def extraer_usernames_string_list(data):
+    """Extrae usernames de estructuras con 'string_list_data'.
+    Acepta tanto listas directas como dicts con una sola clave que contiene la lista."""
+    if data is None:
+        return set()
+    # Si es un dict (ej: {'relationships_following': [...]}), tomamos su lista interna
+    if isinstance(data, dict):
+        for valor in data.values():
+            if isinstance(valor, list):
+                data = valor
+                break
+    usernames = set()
+    for item in data:
+        for entry in item.get('string_list_data', []):
+            if 'value' in entry:
+                usernames.add(entry['value'])
+    return usernames
+
+def extraer_pendientes(data):
+    """Extrae (username, nombre) de pending_follow_requests.json (formato label_values)."""
+    if data is None:
+        return []
+    if isinstance(data, dict):
+        for valor in data.values():
+            if isinstance(valor, list):
+                data = valor
+                break
+    pendientes = []
+    for item in data:
+        username, nombre = "", ""
+        for lv in item.get('label_values', []):
+            if lv['label'] == 'Nombre de usuario':
+                username = lv['value']
+            elif lv['label'] == 'Nombre':
+                nombre = arreglar_texto(lv['value'])
+        if username:
+            pendientes.append((username, nombre))
+    pendientes.sort(key=lambda x: x[0].lower())
+    return pendientes
+
+# ============================================================
+#  CARGA DE DATOS
+# ============================================================
+followers_data = cargar_json('followers_1.json')
+following_data = cargar_json('following.json')
+pending_data   = cargar_json('pending_follow_requests.json')
+
+followers = extraer_usernames_string_list(followers_data)
+following = extraer_usernames_string_list(following_data)
+pendientes = extraer_pendientes(pending_data)
+
+# ============================================================
+#  ANÁLISIS 1: No te siguen de vuelta
+# ============================================================
+no_te_siguen = sorted(following - followers, key=str.lower)
+print("=" * 55)
+print(f"NO TE SIGUEN DE VUELTA  ({len(no_te_siguen)})")
+print("=" * 55)
+for u in no_te_siguen:
+    print(f"  - {u}  → https://www.instagram.com/{u}")
+
+# ============================================================
+#  ANÁLISIS 2: No los seguís de vuelta
+# ============================================================
+no_los_seguis = sorted(followers - following, key=str.lower)
+print("\n" + "=" * 55)
+print(f"NO LOS SEGUÍS DE VUELTA  ({len(no_los_seguis)})")
+print("=" * 55)
+for u in no_los_seguis:
+    print(f"  - {u}  → https://www.instagram.com/{u}")
+
+# ============================================================
+#  ANÁLISIS 3: Solicitudes pendientes (perfiles privados)
+# ============================================================
+print("\n" + "=" * 55)
+print(f"SOLICITUDES PENDIENTES  ({len(pendientes)})")
+print("=" * 55)
+for username, nombre in pendientes:
+    print(f"  - {username}  ({nombre})")
+    print(f"      → https://www.instagram.com/{username}")
+
+# ============================================================
+#  RESUMEN
+# ============================================================
+print("\n" + "=" * 55)
+print("RESUMEN")
+print("=" * 55)
+print(f"  Seguidores:            {len(followers)}")
+print(f"  Seguidos:              {len(following)}")
+print(f"  No te siguen:          {len(no_te_siguen)}")
+print(f"  No los seguís:         {len(no_los_seguis)}")
+print(f"  Pendientes:            {len(pendientes)}")
