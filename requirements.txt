@@ -1,0 +1,6 @@
+# Este proyecto solo utiliza módulos de la biblioteca estándar de Python:
+#   - json
+#   - os
+#
+# No requiere instalar dependencias externas.
+# Solo necesitás Python 3.x instalado.

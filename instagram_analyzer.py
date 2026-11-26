@@ -4,6 +4,8 @@ import os
 # ============================================================
 #  CONFIGURACIÓN: cambiá esta ruta para cada cuenta
 # ============================================================
+# En Google Colab los archivos subidos quedan en '/content'.
+# En local, dejá los JSON junto al script o apuntá CARPETA a tu carpeta.
 CARPETA = '/content'   # carpeta donde subiste los JSON de Instagram
 
 # ============================================================

@@ -11,6 +11,13 @@ instagram-*/
 *.zip
 
 # ============================================================
+#  EXCEPCIÓN: permitir los archivos de ejemplo anonimizados
+#  (van después de ignorar *.json para que se puedan subir)
+# ============================================================
+!ejemplos/
+!ejemplos/*.json
+
+# ============================================================
 #  PYTHON
 # ============================================================
 __pycache__/
